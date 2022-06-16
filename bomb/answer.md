@@ -138,3 +138,112 @@ for(ll i = 1 ; i < 6; ++i){
 }
 ```
 so the answer should be: "1 2 4 8 16 32"
+
+# Phase 3
+``` assembly
+0000000000400f43 <phase_3>:
+  400f43:	48 83 ec 18          	sub    $0x18,%rsp
+  400f47:	48 8d 4c 24 0c       	lea    0xc(%rsp),%rcx
+  400f4c:	48 8d 54 24 08       	lea    0x8(%rsp),%rdx
+  400f51:	be cf 25 40 00       	mov    $0x4025cf,%esi
+  400f56:	b8 00 00 00 00       	mov    $0x0,%eax
+  400f5b:	e8 90 fc ff ff       	callq  400bf0 <__isoc99_sscanf@plt>
+  400f60:	83 f8 01             	cmp    $0x1,%eax
+  400f63:	7f 05                	jg     400f6a <phase_3+0x27>
+  400f65:	e8 d0 04 00 00       	callq  40143a <explode_bomb>
+  400f6a:	83 7c 24 08 07       	cmpl   $0x7,0x8(%rsp)
+  400f6f:	77 3c                	ja     400fad <phase_3+0x6a>
+  400f71:	8b 44 24 08          	mov    0x8(%rsp),%eax
+  400f75:	ff 24 c5 70 24 40 00 	jmpq   *0x402470(,%rax,8)
+  400f7c:	b8 cf 00 00 00       	mov    $0xcf,%eax
+  400f81:	eb 3b                	jmp    400fbe <phase_3+0x7b>
+  400f83:	b8 c3 02 00 00       	mov    $0x2c3,%eax
+  400f88:	eb 34                	jmp    400fbe <phase_3+0x7b>
+  400f8a:	b8 00 01 00 00       	mov    $0x100,%eax
+  400f8f:	eb 2d                	jmp    400fbe <phase_3+0x7b>
+  400f91:	b8 85 01 00 00       	mov    $0x185,%eax
+  400f96:	eb 26                	jmp    400fbe <phase_3+0x7b>
+  400f98:	b8 ce 00 00 00       	mov    $0xce,%eax
+  400f9d:	eb 1f                	jmp    400fbe <phase_3+0x7b>
+  400f9f:	b8 aa 02 00 00       	mov    $0x2aa,%eax
+  400fa4:	eb 18                	jmp    400fbe <phase_3+0x7b>
+  400fa6:	b8 47 01 00 00       	mov    $0x147,%eax
+  400fab:	eb 11                	jmp    400fbe <phase_3+0x7b>
+  400fad:	e8 88 04 00 00       	callq  40143a <explode_bomb>
+  400fb2:	b8 00 00 00 00       	mov    $0x0,%eax
+  400fb7:	eb 05                	jmp    400fbe <phase_3+0x7b>
+  400fb9:	b8 37 01 00 00       	mov    $0x137,%eax
+  400fbe:	3b 44 24 0c          	cmp    0xc(%rsp),%eax
+  400fc2:	74 05                	je     400fc9 <phase_3+0x86>
+  400fc4:	e8 71 04 00 00       	callq  40143a <explode_bomb>
+  400fc9:	48 83 c4 18          	add    $0x18,%rsp
+  400fcd:	c3                   	retq   
+```
+Key :
++ check $eax (return value of scanf), number of data which is correctly formatted, answer is 2. => there need two numbers
++ check 0x8($rsp) (x $rsp+0x8), we can see that it's the first number
++ The first one should be less then 7, or it would jump to explode_bomb
+
+``` assembly
+  400f71:	8b 44 24 08          	mov    0x8(%rsp),%eax
+  400f75:	ff 24 c5 70 24 40 00 	jmpq   *0x402470(,%rax,8)
+```
+Key:
++ eax is the 32-bit of rax
++ \*0x402470(,%rax,8) is 0x402470[8\*a]
+See status from \*0x402470 to \*0x402470 + 8*7: (like array)
+
+| num |  goto | num | goto |
+| --- | --- | --- | ---|
+|0|0x0000000000400f7c  |1|    0x0000000000400fb9|
+|2|0x0000000000400f83  |3|    0x0000000000400f8a|
+|4|0x0000000000400f91   |5|   0x0000000000400f98|
+|6|0x0000000000400f9f    |7|  0x0000000000400fa6|
+
+Thus, it's like switch
+``` c
+if(a > 7){
+  explode_bomb();
+}
+switch(a){
+  case 0:
+    a = 0xcf;
+    break;
+  case 1:
+    a = 0x137;
+    break;
+  case 2:
+    a = 0x2c3;
+    break;
+  case 3:
+    a = 0x100;
+    break;
+  case 4:
+    a = 0x185;
+    break;
+  case 5:
+    a = 0xce;
+    break;
+  case 6:
+    a = 0x2aa;
+    break;
+  case 7:
+    a = 0x174;
+    break;
+}
+if(a == b){
+  success();
+}
+explode_bomb();
+```
+Thus, the answer of Phase 3 is:
+| a | b |
+| -- | -- |
+| 0 | 0xcf|
+|1 | 0x137 |
+|2 | 0x2c3|
+|3 |0x100|
+|4|0x185|
+|5|0xce|
+|6|0x2aa|
+|7|0x147|
