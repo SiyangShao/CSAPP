@@ -382,14 +382,18 @@ Use GDB to see what's in the map:
 0x4024b0 <array.3449>:  109 'm' 97 'a'  100 'd' 117 'u' 105 'i' 101 'e' 114 'r' 115 's'
 0x4024b8 <array.3449+8>:        110 'n' 102 'f' 111 'o' 116 't' 118 'v' 98 'b'  121 'y' 108 'l'
 ```
+
 Then, it compare arr with %esi
+
 ``` assembly
   4010ae:	c6 44 24 16 00       	movb   $0x0,0x16(%rsp)
   4010b3:	be 5e 24 40 00       	mov    $0x40245e,%esi
   4010b8:	48 8d 7c 24 10       	lea    0x10(%rsp),%rdi
   4010bd:	e8 76 02 00 00       	callq  401338 <strings_not_equal>
 ```
+
 What's in %esi? same as in %0x40245e, use GDB:
+
 ```
 0x40245e:       "flyers"
 ```
@@ -663,8 +667,13 @@ narr = {0x6032d0,0x6032e0,0x6032f0,0x603300,0x603310,0x603320};
 The narr should be 3 4 5 6 1 2. Note: narr is 7 - arr, so arr should be: 4 3 2 1 6 5, which is the answer.
 # Answer for all:
 Border relations with Canada have never been better.
+
 1 2 4 8 16 32
+
 0 207
+
 7 0
+
 9?>567
+
 4 3 2 1 6 5
